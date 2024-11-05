@@ -9,13 +9,13 @@ def get_digraph(edgelist_path: str = None, add_attributes: bool = True, attribut
     """
     Create a directed graph from Edgelist.txt
 
-    :param edgelist_path: path to the `Edgelist.txt` file (default is the intended project structure)
+    :param edgelist_path: path to the `edgelist.txt` file (default is the intended project structure)
     :param add_attributes: True if you want to add node attributes with data from `processed.csv` (by default True)
     :param attributes_path: path to the `processed.csv` file (default is the intended project structure). Ignored if `add_attributes` is False 
     :returns: nx.DiGraph 
     """
     if not edgelist_path:
-        g = nx.read_edgelist(os.path.join('data', 'Edgelist.txt'), nodetype=int, create_using=nx.DiGraph)
+        g = nx.read_edgelist(os.path.join('data', 'edgelist.txt'), nodetype=int, create_using=nx.DiGraph)
     else:
         g = nx.read_edgelist(edgelist_path, nodetype=int, create_using=nx.DiGraph)
     if add_attributes:
