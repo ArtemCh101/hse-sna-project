@@ -2,3 +2,7 @@
 data/*
 *.gz
 __*__
+paper/*
+!paper/*.pdf
+!paper/*.tex
+!paper/images/
