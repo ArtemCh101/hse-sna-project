@@ -1,4 +1,5 @@
-.venv
+.*
+!.gitignore
 data/*
 *.gz
 __*__
