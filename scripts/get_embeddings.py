@@ -5,6 +5,7 @@ from tqdm import tqdm
 import os
 import gensim.downloader as api
 
+
 def get_weighted_text_embedding(text, word_vectors, tfidf_weights):
     words = text.split()
     word_embeddings = []
@@ -13,7 +14,7 @@ def get_weighted_text_embedding(text, word_vectors, tfidf_weights):
         if word in word_vectors and word in tfidf_weights:
             word_embeddings.append(word_vectors[word] * tfidf_weights[word])
             weights.append(tfidf_weights[word])
-    
+
     if not word_embeddings:
         return None
 
@@ -34,7 +35,8 @@ tfidf_feature_names = vectorizer.get_feature_names_out()
 
 text_embeddings = []
 for i, text in tqdm(enumerate(texts), total=len(texts)):
-    tfidf_weights = {word: tfidf_matrix[i, idx] for word, idx in zip(tfidf_feature_names, range(len(tfidf_feature_names)))}
+    tfidf_weights = {word: tfidf_matrix[i, idx] for word, idx in zip(
+        tfidf_feature_names, range(len(tfidf_feature_names)))}
     embedding = get_weighted_text_embedding(text, word_vectors, tfidf_weights)
     if embedding is not None:
         text_embeddings.append(embedding)
