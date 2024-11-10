@@ -91,5 +91,14 @@ Another interesting thing that we found is how average in-degrees and out-degree
 \includegraphics[width=1\linewidth]{degrees_over_time.png}
 \end{figure}
 A downwards trend in the end for in-degree and upwards trend in the beginning are noticeable. Explanation to this phenomena is rather simple: older papers had more time to gain popularity and therefore have more incoming edges, whereas papers from 2003 do not have any papers in our dataset that cite them. The opposite happens with the out-degree. Earlier papers cited even earlier papers (from 1980s) that were not included in our graph and thus have little to no outgoing edges. It is also worth noticing that the growth of out-degree slows down closer to 2003. It means that almost enough papers are included in the graph at that time to publish a paper sourcing only these modern papers in our dataset.
-
+\subsection{Cluster properties}
+We compared Louvain and label propagation community detection algorithms. All other methods were extremely slow. The best modularity was achieved by Louvain algorithm: 0.655 and 31 communities with fixed seed compared to 969 classes and 0.541 modularity using label propagation. We have divided the articles into the same number of clusters according to their abstracts using text embedding from `glove-wiki-gigaword-50` model (we averaged the embeddings of each word in the abstract) and KMeans algorithm. We also tried aglomerative clustering and gaussian mixture. Modularity for all of them was really poor, which is not suprising. That's the visualisation of it:
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{Aglomerative.png}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{gm.png}
+\end{figure}
 \end{document}
