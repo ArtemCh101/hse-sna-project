@@ -21,11 +21,12 @@ def get_weighted_text_embedding(text, word_vectors, tfidf_weights):
     weighted_embedding = np.average(word_embeddings, axis=0, weights=weights)
     return weighted_embedding
 
+emb_size = 50
 
 df_path = os.path.join(os.pardir, 'data', 'processed.csv')
 df = pd.read_csv(df_path)
 
-word_vectors = api.load("glove-wiki-gigaword-50")
+word_vectors = api.load(f"glove-wiki-gigaword-{emb_size}")
 texts = df['Abstract'].tolist()
 
 vectorizer = TfidfVectorizer()
@@ -38,7 +39,8 @@ for i, text in tqdm(enumerate(texts), total=len(texts)):
     tfidf_weights = {word: tfidf_matrix[i, idx] for word, idx in zip(
         tfidf_feature_names, range(len(tfidf_feature_names)))}
     embedding = get_weighted_text_embedding(text, word_vectors, tfidf_weights)
-    if embedding is not None:
-        text_embeddings.append(embedding)
+    if embedding is None:
+        text_embeddings.append(np.zeros(emb_size))
+    text_embeddings.append(embedding)
 
-np.save(os.path.join(os.pardir, 'embeddings.npy'), np.array(text_embeddings))
+np.save(os.path.join(os.pardir, f'embeddings_{emb_size}.npy'), np.array(text_embeddings))
