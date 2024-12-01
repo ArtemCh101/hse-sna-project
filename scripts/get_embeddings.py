@@ -40,7 +40,8 @@ for i, text in tqdm(enumerate(texts), total=len(texts)):
         tfidf_feature_names, range(len(tfidf_feature_names)))}
     embedding = get_weighted_text_embedding(text, word_vectors, tfidf_weights)
     if embedding is None:
-        text_embeddings.append(np.zeros(emb_size))
-    text_embeddings.append(embedding)
+        text_embeddings.append(np.zeros_like(text_embeddings[-1]))
+    else:
+        text_embeddings.append(embedding)
 
 np.save(os.path.join(os.pardir, f'embeddings_{emb_size}.npy'), np.array(text_embeddings))
