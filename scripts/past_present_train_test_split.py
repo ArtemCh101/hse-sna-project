@@ -27,6 +27,8 @@ def train_test_split_indegree(G, df, input_date='2001-01-01',test_frac=0.1):
 
     print(f'Papers after date found by split : {len(nodes_after_date)}')
 
+    np.random.seed(10) 
+    
     np.random.shuffle(nodes_after_date)
     split_index = int((1 - test_frac) * len(nodes_after_date))
     train, test = nodes_after_date[:split_index], nodes_after_date[split_index:]
