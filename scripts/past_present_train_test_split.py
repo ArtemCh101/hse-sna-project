@@ -43,7 +43,9 @@ def train_test_split_indegree(G, df, input_date='2001-01-01',test_frac=0.1):
 
     # Add  to the dataframe
     df.loc[df['Paper_ID'].isin(indegree_before_date.keys()), 'target_citation_rate'] = df.loc[df['Paper_ID'].isin(indegree_before_date.keys()), 'Paper_ID'].map(indegree_before_date)
-
+    
+    df['target_citation_rate'] = df['target_citation_rate'].astype(int)
+    
     return (df,(train, test))
 
 @cache
