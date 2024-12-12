@@ -1,8 +1,7 @@
-import ast
+from functools import cache
 import os, sys
 import networkx as nx
 import pandas as pd
-import datetime
 import numpy as np
 
 scripts_dir = os.path.join(os.path.dirname(os.path.abspath('')), 'scripts')
@@ -47,6 +46,7 @@ def train_test_split_indegree(G, df, input_date='2001-01-01',test_frac=0.1):
 
     return (df,(train, test))
 
+@cache
 def prepare_training_data(input_date='2001-01-01', test_frac=0.1):
     '''
     Returns subgraph of graph G, located on the default path, which contains only vertecies

@@ -3,12 +3,12 @@ from dgl.nn import SAGEConv
 import torch.nn.functional as F
 
 class GraphSAGE(nn.Module):
-    def __init__(self, in_feats, h_feats, dropout=False):
+    def __init__(self, in_feats, h_feats, n_classes, dropout=False):
         super(GraphSAGE, self).__init__()
         self.conv1 = SAGEConv(in_feats, h_feats, 'mean')
         if dropout:
             self.dropout = nn.Dropout(p=0.2)
-        self.conv2 = SAGEConv(h_feats, h_feats, 'mean')
+        self.conv2 = SAGEConv(h_feats, n_classes, 'mean')
     
     def forward(self, g, in_feat):
         h = self.conv1(g, in_feat)
