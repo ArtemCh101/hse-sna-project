@@ -1,7 +1,6 @@
-from get_graph import get_digraph
-import networkx as nx
 import numpy as np
 from sklearn.exceptions import NotFittedError
+from get_graph import get_digraph
 
 
 class CitationRateEncoder:
@@ -42,7 +41,7 @@ class CitationRateEncoder:
         """
         self.n_classes = n_classes
 
-    def fit(self, citations: int | np.ndarray):
+    def fit(self, citations: int | np.ndarray | None = None):
         """
         Define class boundaries based on the graph and requested number of
         classes.
@@ -50,20 +49,24 @@ class CitationRateEncoder:
         Parameters
         ----------
         citations: int or ndarray of int
-            Target citation rates, which are used to determine the optimal 
-            class distribution to achieve similar presense of values of each class
+            Target citation rates, which are used to determine the optimal
+            class distribution to achieve similar presense of values of each
+            class. If not provided, in-degrees of an original graph are used.
+            The graph is got using `get_digraph` function with default
+            parameters.
 
         Returns
         -------
         self: object
             Fitted encoder instance.
         """
+        if citations is None:
+            citations = list(dict(get_digraph().in_degree).values())
         classes = []
         bins = []
-        all_nodes = citations
         for i in range(self.n_classes):
-            left = int(np.quantile(all_nodes, i / self.n_classes)) + (i != 0)
-            right = int(np.quantile(all_nodes, (i + 1) / self.n_classes))
+            left = int(np.quantile(citations, i / self.n_classes)) + (i != 0)
+            right = int(np.quantile(citations, (i + 1) / self.n_classes))
             classes.append(np.array([left, right]))
             bins.append(left)
         self.bins_ = np.array(bins)
