@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.exceptions import NotFittedError
-import networkx as nx
 from get_graph import get_digraph
 
 
@@ -62,7 +61,7 @@ class CitationRateEncoder:
             Fitted encoder instance.
         """
         if citations is None:
-            citations = list(get_digraph().in_degree)
+            citations = list(dict(get_digraph().in_degree).values())
         classes = []
         bins = []
         for i in range(self.n_classes):
