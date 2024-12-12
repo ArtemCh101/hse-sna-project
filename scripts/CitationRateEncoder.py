@@ -42,28 +42,25 @@ class CitationRateEncoder:
         """
         self.n_classes = n_classes
 
-    def fit(self, G: nx.DiGraph | None = None):
+    def fit(self, citations: int | np.ndarray):
         """
         Define class boundaries based on the graph and requested number of
         classes.
 
         Parameters
         ----------
-        G: nx.DiGraph, optional
-            Graph to analyze. If not provided, `get_digraph` function is called
-            with default parameters to get the graph from intended project
-            structure (see `get_digraph` for more info).
+        citations: int or ndarray of int
+            Target citation rates, which are used to determine the optimal 
+            class distribution to achieve similar presense of values of each class
 
         Returns
         -------
         self: object
             Fitted encoder instance.
         """
-        if G is None:
-            G: nx.DiGraph = get_digraph()
         classes = []
         bins = []
-        all_nodes = np.array(list(dict(G.in_degree).values()))
+        all_nodes = citations
         for i in range(self.n_classes):
             left = int(np.quantile(all_nodes, i / self.n_classes)) + (i != 0)
             right = int(np.quantile(all_nodes, (i + 1) / self.n_classes))
