@@ -2,6 +2,7 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage{hyperref} % Required for hyperlinks
 \usepackage{amsmath}
+\usepackage{multirow}
 \graphicspath{ {./images/} }
 \newcommand\tab[1][1cm]{\hspace*{#1}}
 \title{Analyzing the Citation Rate of a Scientific Paper Using ML and Graph Algorithms}
@@ -148,5 +149,51 @@ Gaussian Mixture Model & 31 & $0.0008$ \\
 \label{table:clusterization}
 \end{table}
 
+\section{Proposed solution?}
+\subsection{Problem formulation}
+Our main goal was to predict citation rates of the papers. We initially thought of solving a link prediction task (predicting the existence of edge between two nodes) since it seemed logical enough for our task. However, upon further considerations we eventually switched to node classifications. We classified citation rates into 4 classes using quartiles of in-degrees (this manner was inspired by scientific journals' tiers). This approach gave us even-ish distribution of classes. Note that the class boundaries are not evenly distributed, since our graph is a scale-free network.
+
+To form target values and split our graph into train and test samples the following approach was used. Split the graph into two parts: all the nodes with publish date before 2001-01-01 (the date choice was arbitrary) and the rest of them, which will be referred to as old nodes and new nodes respectively. The new nodes have some edges into the old ones (new papers citing old papers), the number of which (converted into a class) for each old node was used as its target value. Note that the edges between old nodes were not considered in the target. By splitting old nodes into train and test sets we got our final data.
+
+\subsection{Baseline}
+Before implementing any baseline we studied how other papers approached this problem.
+
+\textbf{TODO}: baselines in other papers
+
+As a baseline model we used logistic regression classifier as a classical model. We trained it on three different node embeddings:
+\begin{enumerate}
+
+\item[1.] Text embeddings. \newline
+We tried two different approaches to getting text embeddings:
+\begin{enumerate}
+\item[a)] Text had been preprocessed using stemmer and stop words removal before applying bag of words vectorization.
+\item[b)] Text embeddings with ? \textbf{TODO}
+\end{enumerate}
+
+\item[2.] Graph embeddings.\newline
+\textbf{TODO}
+\end{enumerate}
+
+The results of these methods can be found in the Table \ref{table:baseline_metrics}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c c  c c c}
+\hline\hline
+ & & \multicolumn{3}{c}{Metrics} \\
+\cline{3-5}
+Classification model & Embeddings & \multirow{2}{*}{Accuracy} & \multicolumn{2}{c}{F1 score} \\
+ & & & Macro & Weighted \\
+\hline
+\multirow{3}{*}{Logistic Regression} & Text preprocessing + BoW & 0.46 & 0.38 & 0.45 \\
+ & Text 2 & 0.44 & 0.16 & 0.27 \\
+ & Graph & 0.53 & 0.33 & 0.43 \\
+\hline
+\end{tabular}
+\caption{Baseline metrics.}
+\label{table:baseline_metrics}
+\end{table}
+
+\subsection{Our solution}
 
 \end{document}
