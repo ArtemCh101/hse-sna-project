@@ -170,11 +170,11 @@ As a baseline model we employed logistic regression classifier as a classical mo
 We tried two different approaches of getting text embeddings:
 \begin{enumerate}
 \item[a)] Text had been preprocessed using stemmer and stop words removal before applying bag of words vectorization.
-\item[b)] Text embeddings with ? \textbf{TODO}
+\item[b)] Text embeddings were obtained by averaging the embedding of each word in the abstract using glove-wiki-gigaword model with an embedding size of 50
 \end{enumerate}
 
 \item[2.] Graph embeddings.\newline
-\textbf{TODO}
+We used the classic node2vec with default parameters, except that the dimension of the embedding space was 64 (instead of default 128)
 \end{enumerate}
 
 The results of these methods can be found in the Table \ref{table:baseline_metrics}
