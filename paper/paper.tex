@@ -3,6 +3,12 @@
 \usepackage{hyperref} % Required for hyperlinks
 \usepackage{amsmath}
 \usepackage{multirow}
+\usepackage[
+backend=biber,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
+\addbibresource{s.bib}
 \graphicspath{ {./images/} }
 \newcommand\tab[1][1cm]{\hspace*{#1}}
 \title{Analyzing the Citation Rate of a Scientific Paper Using ML and Graph Algorithms}
@@ -23,20 +29,20 @@
 \tab Citation rate is an important metric to know about a scientific paper. It is often referred to as a KPI for researchers. Governmental agencies and scientists pay attention to the citation rate, when evaluating the quality of the paper. Hence, it is important to understand what exactly affects the citation of your work. In our research, we investigate the connection between various properties of scientific papers and their citation rates, using machine learning and graph algorithms. \\
 
 \subsection{Field Overview}
-\tab Due to the importance of citation rate prediction, there are quite a few papers on the subject, which implement various decisions of the stated problem. Those methods range from the most simple ones, which analyse the abstracts of papers with using just basic word embeddings; to a more complex, which take into account the structure of the citation graph. We will be using those simple models as a baseline for our own solutions, which will incorporate graph neural networks(GNN) in combination with the use of abstracts analysis. The studies, we have analyzed are: \\
+\tab Due to the importance of citation rate prediction, there are quite a few papers on the subject, which implement various decisions of the stated problem. Those methods range from the most simple ones, which analyze the abstracts of papers with using just basic word embeddings; to a more complex, which take into account the structure of the citation graph. We will be using those simple models as a baseline for our own solutions, which will incorporate graph neural networks(GNN) in combination with the use of abstracts analysis. The studies, we have analyzed are: \\
 
-\tab \href{https://link.springer.com/chapter/10.1007/978-3-642-40319-4_2?fromPaywallRec=false}{Predicting High Impact Academic Papers Using Citation Network Features} , that focused primarily on the graph features of the network, disregarding any meta-information about the paper, such as authotrs, scientific journal, which posted it, or even the abstract\\
+\tab There are quite some works, that focused primarily on the graph features of the network,like this \cite{1}, which disregarded any meta-information about the paper, such as authors, scientific journal, which posted it, or even the abstract\\
 
-\tab \href{https://link.springer.com/article/10.1007/s11192-020-03479-5?fromPaywallRec=true}{Predicting the future success of scientific publications through social network and semantic analysis} on the other hand, took into account the semantic structure of papers. However, this study used graph information only to create vertex features (betweenness, degree, etc.), and did not implement any graph ML approaches to perform the task\\
+This work \cite{2} on the other hand, took into account the semantic structure of papers. However, this study used graph information only to create vertex features (betweenness, degree, etc.), and did not implement any graph ML approaches to perform the task\\
 
-\tab \href{https://link.springer.com/chapter/10.1007/978-3-319-06483-3_4?fromPaywallRec=true}{Learning to Measure Influence in a Scientific Social Network} considered not only the author of a publication but also their co-authors, thus creating a more informative structure; yet only basic ML methods were used to conduct the research.\\
+\tab There is also a number of papers, which tried to use various graph algorithms(like PageRank) to predict citation rates \cite{3}. Those methods showed better results, than any baseline, but it ignored any additional information about the paper nonetheless\\
 
-\tab If we want to talk about the use of papers abstracts, then \href{https://www.researchgate.net/publication/348440299_Citation_Intent_Classification_Using_Word_Embedding}{Citation Intent Classification Using Word Embedding} is the work to relate. In this study, a multitude of different models were used to create text embeddings for the papers, which were then used to predict citation rate by the paper abstract.\\
+\tab If we want to talk about the use of papers abstracts, then\cite{4} is the work to relate. In this study, a multitude of different models were used to create text embeddings for the papers, which were then used to predict citation rate by the paper abstract.\\
 
-\tab The next paper inspired the way we interpreted the task, using older citation to predict the future ones: \href{https://www.researchgate.net/publication/381695536_Predicting_citation_impact_of_academic_papers_across_research_areas_using_multiple_models_and_early_citations}{Predicting citation impact of academic papers across research areas using multiple models and early citations}. The idea of splitting given graph by time, and using older and newer papers differently, as well as the use of a couple rather interesting ML algorithms, allowed authors to reach quite impressive results in terms of citation rate prediction .\\
+\tab The next paper inspired the way we interpreted the task, using older citation to predict the future ones\cite{5}. The idea of splitting given graph by time, and using older and newer papers differently, as well as the use of a couple rather interesting ML algorithms, allowed authors to reach quite impressive results in terms of citation rate prediction .\\
 \section{Data Acquisition and Preprocessing}
 
-\tab	The amount of data and its quality is the basis for any data science research and there are quite a number of different datasets in this area. To explore the dependencies between the paper citation rate and its inner properties, we have chosen the dataset: \href{https://www.kaggle.com/datasets/wolfram77/graphs-snap-cit}{HepTh dataset} .The dataset represents the scientific paper citation graph in the field of high-energy physics in the years 1991 to 2003. There were 2 main reasons, for why this dataset was selected. Firstly, almost no research had been conducted on this data, which allowed us to implement baseline decisions from various other papers, and see how they perform on a different dataset. And secondly, due to limited resourses, we did not want to analyze extremely large dataset, so we needed something a touch smaller than that. \\
+\tab	The amount of data and its quality is the basis for any data science research and there are quite a number of different datasets in this area. To explore the dependencies between the paper citation rate and its inner properties, we have chosen the dataset: \href{https://www.kaggle.com/datasets/wolfram77/graphs-snap-cit}{HepTh dataset} .The dataset represents the scientific paper citation graph in the field of high-energy physics in the years 1991 to 2003. There were 2 main reasons, for why this dataset was selected. Firstly, almost no research had been conducted on this data, which allowed us to implement baseline decisions from various other papers, and see how they perform on a different dataset. And secondly, due to limited resources, we did not want to analyze extremely large dataset, so we needed something a touch smaller than that. \\
 \tab	 Couple of words about the structure of the data. An oriented edge between vertices a$\rightarrow$b shows, that paper a cites paper b. Apart from the graph information itself, we are also provided with various features of each paper, which are, however, not standardized. Some features only appear in few papers, while others are present for each. We have decided to keep and work with the following features present for each paper: date of publication, authors, title + abstract. \\
 \tab	The task of processing the dates was particularly tricky one since that part of the data was stored in a multitude of different formats, and they had to be standardized. (We have chosen yyyy-mm-dd format for it). Furthermore, the graph included some edges that led from an older paper to a more recent one, which didn't make sense; hence, those edges were removed from our data. We have also transformed the list of authors from a string into an actual Python list and parsed the abstract from the metadata files provided in the dataset. \\
 \tab	After all the described manipulations, the data was ready for further exploration and analysis. \\
@@ -114,14 +120,14 @@ $$\textbf{Modularity}(G, P) = \frac{1}{|E|} \sum_{u, v \in V} \left[\left(A_{u, 
 where $A$  is the adjacency matrix and $\delta_P(u, v)$ is defined as
 $$\delta_P(u, v) =
 \begin{cases}
-1, & \text{if nodes } u \text{ and } v \text{ lie in the same community in pratition } P \\
+1, & \text{if nodes } u \text{ and } v \text{ lie in the same community in partition } P \\
 0, & \text{otherwise}
 \end{cases}.
 $$ 
 
 First we did community detection on the graph. We compared Louvain and label propagation community detection algorithms since most other methods were extremely slow and thus not suitable for our graph. The best modularity was achieved by Louvain algorithm with partition into 31 classes with fixed seed compared to 969 classes using label propagation. 
 
-To do clusterixation we have divided the articles into the same number of clusters according to their abstracts using text embedding from `glove-wiki-gigaword-50` model (we averaged the embeddings of each word in the abstract) and KMeans algorithm. We also tried agglomerative clustering and Gaussian mixture. Modularity for all of them was really poor, which should not come as a surprise. Visualizations of resulting clustering can be found on Figures \ref{plot:clustering:agglomerative} and \ref{plot:clustering:gaussian_mixture}. The comparison of clustering algorithms can be seen in Table \ref{table:clusterization}.
+To do clusterization we have divided the articles into the same number of clusters according to their abstracts using text embedding from `glove-wiki-gigaword-50` model (we averaged the embeddings of each word in the abstract) and KMeans algorithm. We also tried agglomerative clustering and Gaussian mixture. Modularity for all of them was really poor, which should not come as a surprise. Visualizations of resulting clustering can be found on Figures \ref{plot:clustering:agglomerative} and \ref{plot:clustering:gaussian_mixture}. The comparison of clustering algorithms can be seen in Table \ref{table:clusterization}.
 
 \begin{figure}[h]
 \centering
@@ -197,7 +203,7 @@ Classification model & Embeddings & \multirow{2}{*}{Accuracy} & \multicolumn{2}{
 \end{table}
 
 \subsection{Our solution}
-\tab In search of a better solution, we tried GCN and GCNwLinear models with different types of node embeddings: random embeddings (learnable), text/graph-only embeddings and their concatenation (we tried using each of them separately, as well as in combination with each other). In addition, we searched through the following hyperparameters and settled on:
+\tab In search of a better solution, we tried GCN and GCNwLinear models with different types of node embeddings: random embeddings (learnable), text/graph-only embeddings and their concatenation (we tried using each of them separately, as well as in combination with each other). In addition, we searched through the following hyper parameters and settled on:
 \begin{verbatim}
 n_layers = 6
 random_emb_size = 32
@@ -209,7 +215,7 @@ dropout=0.2
 lr = 5e-4
 node_emb_size = 64
 \end{verbatim}
-Each parameter speaks for itself except of \texttt{crop\_df}, which is responsible for getting rid of the imbalance of classes in the dataset by removing some samples. The idea was to feed the models equal number of samples per each class to minimize the risk of it ignoring the class in prediction, which was the case with baseline models. Above is the best subset of these hyperparameters that we were able to find for GCNwLinear model, which uses combination of text and node embeddings. The metrics achieved by this model are shown in Table \ref{table:final_metrics}.
+Each parameter speaks for itself, except for \texttt{crop_df}, which is responsible for removing the imbalance of classes in the data set by removing some samples. The idea was to feed the models an equal number of samples per class to minimize the risk of ignoring the class in the prediction, which was the case with the baseline models. The above is the best subset of these hyper parameters that we were able to find for the GCNwLinear model, which uses combination of text and node embeddings. The metrics achieved by this model are shown in Table \ref{table:final_metrics}.
 
 \begin{table}[h]
 \centering
@@ -227,7 +233,7 @@ Classification model & Embeddings & \multirow{2}{*}{Accuracy} & \multicolumn{2}{
 \label{table:final_metrics}
 \end{table}
 
-We achieved better overall metrics compared to our baseline but one more prominent improvement is that this model does not ignore any classes in the sense that it decides to maximize the score by not predicting them at all. In the Table \ref{table:class_metrics} is shown the difference of baseline model and our model performance regarding this issue.
+We achieved better overall metrics compared to our baseline, but one more prominent improvement is that this model does not ignore any classes in the sense that it decides to maximize the score by not predicting them at all. In Table \ref{table:class_metrics} the difference of the baseline model and our model performance is shown with respect to this issue.
 
 \begin{table}[h]
 \centering
@@ -255,6 +261,14 @@ We achieved better overall metrics compared to our baseline but one more promine
 \end{table}
 
 \section{Conclusion}
-\tab Unlike the other works, we implemented the combination of text embeddings and node embeddings to complete the task of predicting citation rate. As we can see, on the chosen dataset, this method performed better than other methods from previous works on this subject. Not only were the metrics improved, but also the balance of predicted citation rates became better, not ignoring or overemphasizing any particular class. This goes to show, that GNN models have a bright future regarding the task of predicting citation rates.
-As per usual, those models should be tested more on different datasets and different areas of scientific publication, to confirm its effectiveness and achieve better results.
+\tab Unlike the other works, we implemented the combination of text embeddings and node embeddings to complete the task of predicting the citation rate. As we can see, on the chosen dataset, this method performed better than other methods from previous works on this subject. Not only were the metrics improved, but also the balance of predicted citation rates became better, not ignoring or overemphasizing any particular class. This goes to show that GNN models have a bright future regarding the task of predicting citation rates.
+As usual, those models should be tested more on different datasets in different areas of scientific publication to confirm their effectiveness and achieve better results.
+
+\medskip
+
+\printbibliography[
+heading=bibintoc,
+title={References}
+]
+
 \end{document}
