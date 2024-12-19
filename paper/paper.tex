@@ -37,7 +37,6 @@
 \section{Data Acquisition and Preprocessing}
 
 \tab	The amount of data and its quality is the basis for any data science research and there are quite a number of different datasets in this area. To explore the dependencies between the paper citation rate and its inner properties, we have chosen the dataset: \href{https://www.kaggle.com/datasets/wolfram77/graphs-snap-cit}{HepTh dataset} .The dataset represents the scientific paper citation graph in the field of high-energy physics in the years 1991 to 2003. There were 2 main reasons, for why this dataset was selected. Firstly, almost no research had been conducted on this data, which allowed us to implement baseline decisions from various other papers, and see how they perform on a different dataset. And secondly, due to limited resourses, we did not want to analyze extremely large dataset, so we needed something a touch smaller than that. \\
-
 \tab	 Couple of words about the structure of the data. An oriented edge between vertices a$\rightarrow$b shows, that paper a cites paper b. Apart from the graph information itself, we are also provided with various features of each paper, which are, however, not standardized. Some features only appear in few papers, while others are present for each. We have decided to keep and work with the following features present for each paper: date of publication, authors, title + abstract. \\
 \tab	The task of processing the dates was particularly tricky one since that part of the data was stored in a multitude of different formats, and they had to be standardized. (We have chosen yyyy-mm-dd format for it). Furthermore, the graph included some edges that led from an older paper to a more recent one, which didn't make sense; hence, those edges were removed from our data. We have also transformed the list of authors from a string into an actual Python list and parsed the abstract from the metadata files provided in the dataset. \\
 \tab	After all the described manipulations, the data was ready for further exploration and analysis. \\
@@ -47,7 +46,7 @@
 \subsection{General Properties}
 
 \tab Let $V$ be the set of all papers (nodes) and $E = \{(v_1, v_2): v_1, v_2 \in V, v_1 \text{ cites } v_2 \}$ all the citations between papers (directed edges). Then $G(V, E)$ is our directed citation graph.
-For this graph $$|V| = 27,376$$ $$|E| = 351,025$$
+For this graph $$|V| = 27.376$$ $$|E| = 351.025$$
 \tab The original graph had more nodes -- 27.7K, but we discovered that it had around 140 weakly connected components (connected components in graph $G'$ obtained from $G$ by disregarding the edges orientation). Most of them were of sizes 3-5 so we decided to leave only the main component and delete all the stray nodes. Due to the graph's nature, it cannot be strongly connected (and number of strongly connected components is exactly $|V|$), since strong connectivity means that there exists a path from any node $v$ to any other node $u$ in the component, but it yields a cycle, which is impossible in G, as stated earlier. \\
 \tab Some graph properties are defined for directed graphs only if they are strongly connected: diameter --- length of the "longest shortest path", average path length, girth -- length of the smallest cycle (usually only defined for undirected graphs). What we can calculate is the density of $G$:
 $$D(G) = \frac{|E|}{2\binom{|V|}{2}} \approx 0.00046,$$
@@ -188,9 +187,9 @@ The results of these methods can be found in the Table \ref{table:baseline_metri
 Classification model & Embeddings & \multirow{2}{*}{Accuracy} & \multicolumn{2}{c}{F1 score} \\
  & & & Macro & Weighted \\
 \hline
-\multirow{3}{*}{Logistic Regression} & Text preprocessing + BoW & 0.46 & 0.38 & 0.45 \\
- & Text 2 & 0.44 & 0.16 & 0.27 \\
- & Graph & 0.53 & 0.33 & 0.43 \\
+\multirow{3}{*}{Logistic Regression} & Preprocessing + BoW & 0.46 & 0.38 & 0.45 \\
+ & glove-wiki-gigaword & 0.44 & 0.16 & 0.27 \\
+ & node2vec & 0.53 & 0.33 & 0.43 \\
 \hline
 \end{tabular}
 \caption{Baseline metrics.}
@@ -198,7 +197,7 @@ Classification model & Embeddings & \multirow{2}{*}{Accuracy} & \multicolumn{2}{
 \end{table}
 
 \subsection{Our solution}
-In search of a better solution, we tried GCN and GCNwLinear models with different types of node embeddings: random embeddings (learnable), text/graph-only embeddings and their concatenation (we tried using each of them separately, as well as in combination with each other). In addition, we went through the following parameters:
+\tab In search of a better solution, we tried GCN and GCNwLinear models with different types of node embeddings: random embeddings (learnable), text/graph-only embeddings and their concatenation (we tried using each of them separately, as well as in combination with each other). In addition, we searched through the following hyperparameters and settled on:
 \begin{verbatim}
 n_layers = 6
 random_emb_size = 32
@@ -210,7 +209,8 @@ dropout=0.2
 lr = 5e-4
 node_emb_size = 64
 \end{verbatim}
-Each parameter speaks for itself except of \textbf{crop\_df} which is responsible for getting rid of the imbalance of classes in the dataset by removing some samples or not. Above, is the best subset of these hyperparameters, we were able to find for GCNwLinear model, which uses combination of text and node embeddings. The metrics achieved by this model are shown below:
+Each parameter speaks for itself except of \texttt{crop\_df}, which is responsible for getting rid of the imbalance of classes in the dataset by removing some samples. The idea was to feed the models equal number of samples per each class to minimize the risk of it ignoring the class in prediction, which was the case with baseline models. Above is the best subset of these hyperparameters that we were able to find for GCNwLinear model, which uses combination of text and node embeddings. The metrics achieved by this model are shown in Table \ref{table:final_metrics}.
+
 \begin{table}[h]
 \centering
 \begin{tabular}{c c  c c c}
@@ -220,12 +220,40 @@ Each parameter speaks for itself except of \textbf{crop\_df} which is responsibl
 Classification model & Embeddings & \multirow{2}{*}{Accuracy} & \multicolumn{2}{c}{F1 score} \\
  & & & Macro & Weighted \\
 \hline
-\multirow{1}{*}{GCNwLinear} & Concatenated text and node embs & 0.58 & 0.54 & 0.59 \\
+\multirow{1}{*}{GCNwLinear} & Concat text and node & 0.58 & 0.54 & 0.59 \\
 \hline
 \end{tabular}
 \caption{Final metrics.}
 \label{table:final_metrics}
 \end{table}
+
+We achieved better overall metrics compared to our baseline but one more prominent improvement is that this model does not ignore any classes in the sense that it decides to maximize the score by not predicting them at all. In the Table \ref{table:class_metrics} is shown the difference of baseline model and our model performance regarding this issue.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c | c c c c}
+\hline\hline
+
+\multirow{2}{*}{Classification model} & & \multicolumn{3}{c}{Class metrics} \\ 
+%\cline{3-5}
+& Class ID & Precision & Recall & F1 score \\
+\hline
+\multirow{4}{*}{Baseline}
+ & 0 & 0.54 & 0.90 & 0.68 \\
+ & 1 & 0.00 & 0.00 & 0.00 \\
+ & 2 & 0.25 & 0.04 & 0.07 \\
+ & 3 & 0.54 & 0.58 & 0.56 \\
+\hline
+\multirow{4}{*}{GCNwLinear}
+ & 0 & 0.75 & 0.65 & 0.70 \\
+ & 1 & 0.28 & 0.36 & 0.32 \\
+ & 2 & 0.37 & 0.40 & 0.38 \\
+ & 3 & 0.75 & 0.75 & 0.75 \\
+\end{tabular}
+\caption{Comparison of baseline and our model on class metrics.}
+\label{table:class_metrics}
+\end{table}
+
 \section{Conclusion}
 \tab Unlike the other works, we implemented the combination of text embeddings and node embeddings to complete the task of predicting citation rate. As we can see, on the chosen dataset, this method performed better than other methods from previous works on this subject. Not only were the metrics improved, but also the balance of predicted citation rates became better, not ignoring or overemphasizing any particular class. This goes to show, that GNN models have a bright future regarding the task of predicting citation rates.
 As per usual, those models should be tested more on different datasets and different areas of scientific publication, to confirm its effectiveness and achieve better results.
